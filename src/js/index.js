@@ -2,6 +2,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
+import { ListElement } from "./component/ListElement.js";
 
 //include bootstrap npm library into the bundle
 import "bootstrap";
@@ -13,7 +14,8 @@ class ToDoMain extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			anInput: ""
+			anInput: "",
+			theList: []
 		};
 		this.updateState = this.updateState.bind(this);
 	}
@@ -22,11 +24,41 @@ class ToDoMain extends React.Component {
 		this.setState({ anInput: e.target.value });
 	}
 
+	deleteEntry = ind => {
+		let temp = this.state.theList;
+		temp.splice(ind, 1);
+		this.setState({ theList: temp });
+	};
+
+	componentDidMount = () => {
+		fetch("https://assets.breatheco.de/apis/fake/todos/user/Gmihov")
+			.then(resp => {
+				if (resp.ok) {
+					return resp.json();
+				} else {
+					console.log("Something happens");
+				}
+			})
+			.then(data => {
+				this.setState({ theList: data });
+			});
+	};
+
 	render() {
+		let aList = this.state.theList.map((todo, index) => {
+			return (
+				<ListElement
+					key={index}
+					name={todo.label}
+					action={() => this.deleteEntry(index)}
+				/>
+			);
+		});
 		return (
-			<div className="container m-auto text-center">
+			<div className="container">
 				<h1>Your To Do List</h1>
 				<input
+					className="inpt"
 					type="text"
 					value={this.state.anInput}
 					onChange={this.updateState}
@@ -34,19 +66,17 @@ class ToDoMain extends React.Component {
 				/>
 				<button
 					type="button"
-					className="btn"
-					onClick={() => {
-						let ul = document.querySelector("#toDoList");
-						ul.innerHTML += `<li>${this.state.anInput}</li>`;
-					}}>
+					className="bttn"
+					onClick={() =>
+						this.setState({
+							theList: this.state.theList.concat([
+								this.state.anInput
+							])
+						})
+					}>
 					Enter Activity
 				</button>
-				<br />
-				{this.state.anInput}
-				<br />
-				<ul id="toDoList">
-					<li>Example</li>
-				</ul>
+				<ul id="toDoList">{aList}</ul>
 			</div>
 		);
 	}
