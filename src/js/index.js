@@ -35,8 +35,6 @@ class ToDoMain extends React.Component {
 			.then(resp => {
 				if (resp.ok) {
 					return resp.json();
-				} else {
-					console.log("Something happens");
 				}
 			})
 			.then(data => {
